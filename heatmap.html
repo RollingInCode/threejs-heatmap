@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js Heatmap</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <input type="file" id="fileInput">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.131.0/build/three.min.js"></script>
+    <script>
+        // Create the scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a 10x10 grid of cubes
+        const gridSize = 10;
+        const gridSpacing = 2;
+        const cubes = [];
+        for (let x = 0; x < gridSize; x++) {
+            for (let z = 0; z < gridSize; z++) {
+                const cubeSize = 2;
+                const cube = new THREE.Mesh(
+                    new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize),
+                    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+                );
+                cube.position.x = (x - gridSize / 2) * gridSpacing;
+                cube.position.z = (z - gridSize / 2) * gridSpacing;
+                scene.add(cube);
+                cubes.push(cube);
+            }
+        }
+
+        // Update cube colors based on heatmap data from file
+        function updateHeatmapFromFile(data) {
+            const lines = data.split('\n');
+            const maxHeatValue = Math.max(...lines); // Find the maximum heat value
+
+            cubes.forEach((cube, i) => {
+                const heatValue = parseFloat(lines[i]);
+                const colorValue = heatValue / maxHeatValue; // Normalize heat value to [0, 1]
+                cube.material.color.setHSL(0.2 + (1 - colorValue) * 0.8, 1, 0.5);
+            });
+        }
+
+        // Handle file input change event
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const contents = e.target.result;
+                updateHeatmapFromFile(contents);
+            };
+
+            reader.readAsText(file);
+        });
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        // Set camera position and start animation
+        camera.position.set(0, 10, 20);
+        camera.lookAt(scene.position);
+        animate();
+    </script>
+</body>
+</html>

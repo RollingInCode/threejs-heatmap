@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+dist/
+
+# Development build artifacts
+*.js.map
+
+# IDE or editor specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build cache
+.cache/
+
+# Generated or compiled files
+build/
+out/
+
+# Miscellaneous files
+.DS_Store
+Thumbs.db
